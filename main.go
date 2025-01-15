@@ -1,37 +1,38 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
+	"net/http"
 
+	"github.com/go-chi/chi"
 	"github.com/melisebestrada/go-web-api/products"
 )
 
 func main() {
-	products, err := getProductsData()
+	err := products.LoadProductsFromFile("data/products.json")
 	if err != nil {
 		fmt.Println("error getting products data: ", err)
 		return
 	}
 
-	fmt.Println(products)
+	r := chi.NewRouter()
+
+	r.Get("/ping", getPong)
+
+	// product router
+	r.Route("/product", func(r chi.Router) {
+		r.Get("/", products.GetAllProducts)
+		r.Get("/{id}", products.GetProductById)
+	})
+
+	fmt.Println("Server started at http://localhost:8080")
+	err = http.ListenAndServe(":8080", r)
+	if err != nil {
+		fmt.Println("Error starting server: ", err)
+	}
+
 }
 
-func getProductsData() ([]products.Product, error) {
-	file, err := os.Open("data/products.json")
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var products []products.Product
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&products)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return products, nil
+func getPong(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("pong"))
 }
