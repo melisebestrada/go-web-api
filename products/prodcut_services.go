@@ -37,3 +37,28 @@ func GetProductById(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "The id does not exist", http.StatusNotFound)
 
 }
+
+func GetProductByPriceGt(w http.ResponseWriter, r *http.Request) {
+	price := r.URL.Query().Get("priceGt")
+	if price == "" {
+		http.Error(w, "priceGt param is required", http.StatusBadRequest)
+		return
+	}
+
+	priceFloat, err := strconv.ParseFloat(price, 64)
+	if err != nil {
+		http.Error(w, "Enter a valid price", http.StatusBadRequest)
+		return
+	}
+
+	var products []Product
+
+	for _, prod := range ProductsData {
+		if prod.Price > priceFloat {
+			products = append(products, prod)
+		}
+	}
+
+	w.Header().Add("content-type", "application/json")
+	json.NewEncoder(w).Encode(products)
+}

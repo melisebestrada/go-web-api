@@ -23,6 +23,7 @@ func main() {
 	r.Route("/product", func(r chi.Router) {
 		r.Get("/", products.GetAllProducts)
 		r.Get("/{id}", products.GetProductById)
+		r.Get("/search", products.GetProductByPriceGt)
 	})
 
 	fmt.Println("Server started at http://localhost:8080")
