@@ -60,6 +60,7 @@ func (s *Server) Run() (err error) {
 			r.Get("/", productHandler.GetAllProducts())
 			r.Get("/{id}", productHandler.GetProductById())
 			r.Get("/search", productHandler.SearchPriceGt())
+			r.Post("/", productHandler.CreateProduct())
 		})
 	})
 

@@ -7,6 +7,8 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/melisebestrada/go-web-api/internal/service"
+	"github.com/melisebestrada/go-web-api/pkg/validations"
+	"github.com/melisebestrada/go-web-api/pkg/web"
 )
 
 type ProductHandler struct {
@@ -76,5 +78,34 @@ func (ph *ProductHandler) SearchPriceGt() http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(products)
+	}
+}
+
+func (ph *ProductHandler) CreateProduct() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var reqBody web.RequestBodyProduct
+		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+			web.SendResponse(w, "Bad Request", nil, true, http.StatusBadRequest)
+			return
+		}
+		validationFail := validations.ValidatedEmptyFields(w, reqBody)
+		if validationFail {
+			return
+		}
+
+		err := validations.ValidateDate(reqBody.Expiration)
+		if err != nil {
+			web.SendResponse(w, err.Error(), nil, true, http.StatusBadRequest)
+			return
+		}
+
+		newProduct, err := ph.service.CreateProduct(reqBody)
+		if err != nil {
+			web.SendResponse(w, err.Error(), nil, true, http.StatusBadRequest)
+			return
+		}
+
+		web.SendResponse(w, "Product created", newProduct, false, http.StatusCreated)
+
 	}
 }

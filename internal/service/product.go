@@ -5,12 +5,14 @@ import (
 
 	"github.com/melisebestrada/go-web-api/internal/domain"
 	"github.com/melisebestrada/go-web-api/internal/repository"
+	"github.com/melisebestrada/go-web-api/pkg/web"
 )
 
 type ProductServiceInterface interface {
 	GetAllProducts() ([]domain.Product, error)
 	GetProductById(id int) (domain.Product, error)
 	SearchPriceGt(price float64) ([]domain.Product, error)
+	CreateProduct(product web.RequestBodyProduct) (domain.Product, error)
 }
 
 type productService struct {
@@ -55,4 +57,12 @@ func (ps *productService) SearchPriceGt(price float64) ([]domain.Product, error)
 		}
 	}
 	return productsGt, nil
+}
+
+func (ps *productService) CreateProduct(product web.RequestBodyProduct) (domain.Product, error) {
+	newProduct, err := ps.repository.CreateProduct(product)
+	if err != nil {
+		return domain.Product{}, err
+	}
+	return newProduct, nil
 }
