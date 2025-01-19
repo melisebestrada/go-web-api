@@ -6,13 +6,13 @@ import (
 	"os"
 
 	"github.com/melisebestrada/go-web-api/internal/domain"
-	"github.com/melisebestrada/go-web-api/pkg/web"
 )
 
 type ProductsRepositoryInterface interface {
 	GetAllProducts() ([]domain.Product, error)
 	GetProductById(id int) (domain.Product, error)
-	CreateProduct(product web.RequestBodyProduct) (domain.Product, error)
+	CreateProduct(product domain.Product) (domain.Product, error)
+	UpdateProduct(id int, product domain.Product) (domain.Product, error)
 }
 
 type productsRepository struct {
@@ -64,7 +64,7 @@ func (pr *productsRepository) loadProductsFromFile(filePath string) error {
 	return nil
 }
 
-func (pr *productsRepository) CreateProduct(product web.RequestBodyProduct) (domain.Product, error) {
+func (pr *productsRepository) CreateProduct(product domain.Product) (domain.Product, error) {
 	for _, prod := range pr.products {
 		if prod.CodeValue == product.CodeValue {
 			return domain.Product{}, fmt.Errorf("code value already exists")
@@ -85,4 +85,26 @@ func (pr *productsRepository) CreateProduct(product web.RequestBodyProduct) (dom
 
 	return newProduct, nil
 
+}
+
+func (pr *productsRepository) UpdateProduct(id int, product domain.Product) (domain.Product, error) {
+	oldProduct := -1
+	for index, prod := range pr.products {
+		if prod.CodeValue == product.CodeValue && id != prod.Id {
+			return domain.Product{}, fmt.Errorf("code value already exists")
+		}
+
+		if id == prod.Id {
+			oldProduct = index
+		}
+	}
+
+	if oldProduct == -1 {
+		return domain.Product{}, fmt.Errorf("product with id %d not found", id)
+	}
+
+	product.Id = id
+	pr.products[oldProduct] = product
+
+	return pr.products[oldProduct], nil
 }

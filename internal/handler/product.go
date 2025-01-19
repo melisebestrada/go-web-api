@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi"
+	"github.com/melisebestrada/go-web-api/internal/domain"
 	"github.com/melisebestrada/go-web-api/internal/service"
 	"github.com/melisebestrada/go-web-api/pkg/validations"
 	"github.com/melisebestrada/go-web-api/pkg/web"
@@ -83,11 +84,12 @@ func (ph *ProductHandler) SearchPriceGt() http.HandlerFunc {
 
 func (ph *ProductHandler) CreateProduct() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var reqBody web.RequestBodyProduct
+		var reqBody domain.Product
 		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
 			web.SendResponse(w, "Bad Request", nil, true, http.StatusBadRequest)
 			return
 		}
+
 		validationFail := validations.ValidatedEmptyFields(w, reqBody)
 		if validationFail {
 			return
@@ -106,6 +108,42 @@ func (ph *ProductHandler) CreateProduct() http.HandlerFunc {
 		}
 
 		web.SendResponse(w, "Product created", newProduct, false, http.StatusCreated)
+
+	}
+}
+
+func (ph *ProductHandler) UpdateProduct() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		idProduct, err := strconv.Atoi(chi.URLParam(r, "id"))
+		if err != nil {
+			http.Error(w, "Enter a valid id", http.StatusBadRequest)
+			return
+		}
+
+		var reqBody domain.Product
+		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+			web.SendResponse(w, "Bad request", nil, true, http.StatusBadRequest)
+			return
+		}
+
+		validationFail := validations.ValidatedEmptyFields(w, reqBody)
+		if validationFail {
+			return
+		}
+
+		err = validations.ValidateDate(reqBody.Expiration)
+		if err != nil {
+			web.SendResponse(w, err.Error(), nil, true, http.StatusBadRequest)
+			return
+		}
+
+		updatedProduct, err := ph.service.UpdateProduct(idProduct, reqBody)
+		if err != nil {
+			web.SendResponse(w, err.Error(), nil, true, http.StatusBadRequest)
+			return
+		}
+
+		web.SendResponse(w, "Product updated", updatedProduct, false, http.StatusOK)
 
 	}
 }

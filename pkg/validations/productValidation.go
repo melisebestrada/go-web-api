@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/melisebestrada/go-web-api/internal/domain"
 	"github.com/melisebestrada/go-web-api/pkg/web"
 )
 
@@ -18,7 +19,7 @@ func ValidateDate(date string) error {
 	return nil
 }
 
-func ValidatedEmptyFields(w http.ResponseWriter, reqBody web.RequestBodyProduct) bool {
+func ValidatedEmptyFields(w http.ResponseWriter, reqBody domain.Product) bool {
 	switch {
 	case reqBody.Name == "":
 		web.SendResponse(w, "Name field is required", nil, true, http.StatusBadRequest)
