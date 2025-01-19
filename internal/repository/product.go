@@ -14,6 +14,7 @@ type ProductsRepositoryInterface interface {
 	CreateProduct(product domain.Product) (domain.Product, error)
 	UpdateProduct(id int, product domain.Product) (domain.Product, error)
 	PatchProduct(id int, product domain.Product) (domain.Product, error)
+	DeleteProduct(id int) (domain.Product, error)
 }
 
 type productsRepository struct {
@@ -146,4 +147,24 @@ func (pr *productsRepository) PatchProduct(id int, product domain.Product) (doma
 	}
 
 	return pr.products[productIndex], nil
+}
+
+func (pr *productsRepository) DeleteProduct(id int) (domain.Product, error) {
+	productIndex := -1
+	var deletedProduct domain.Product
+
+	for index, product := range pr.products {
+		if product.Id == id {
+			productIndex = index
+			deletedProduct = product
+			break
+		}
+	}
+
+	if productIndex == -1 {
+		return deletedProduct, fmt.Errorf("product with id %d not found", id)
+	}
+
+	pr.products = append(pr.products[:productIndex], pr.products[productIndex+1:]...)
+	return deletedProduct, nil
 }

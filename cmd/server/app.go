@@ -63,6 +63,7 @@ func (s *Server) Run() (err error) {
 			r.Post("/", productHandler.CreateProduct())
 			r.Put("/{id}", productHandler.UpdateProduct())
 			r.Patch("/{id}", productHandler.PatchProduct())
+			r.Delete("/{id}", productHandler.DeleteProduct())
 		})
 	})
 

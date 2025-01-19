@@ -14,6 +14,7 @@ type ProductServiceInterface interface {
 	CreateProduct(product domain.Product) (domain.Product, error)
 	UpdateProduct(id int, product domain.Product) (domain.Product, error)
 	PatchProduct(id int, product domain.Product) (domain.Product, error)
+	DeleteProduct(id int) (domain.Product, error)
 }
 
 type productService struct {
@@ -76,4 +77,9 @@ func (ps *productService) UpdateProduct(id int, product domain.Product) (domain.
 func (ps *productService) PatchProduct(id int, product domain.Product) (domain.Product, error) {
 	productUpdated, err := ps.repository.PatchProduct(id, product)
 	return productUpdated, err
+}
+
+func (ps *productService) DeleteProduct(id int) (domain.Product, error) {
+	deletedProduct, err := ps.repository.DeleteProduct(id)
+	return deletedProduct, err
 }
