@@ -62,6 +62,7 @@ func (s *Server) Run() (err error) {
 			r.Get("/search", productHandler.SearchPriceGt())
 			r.Post("/", productHandler.CreateProduct())
 			r.Put("/{id}", productHandler.UpdateProduct())
+			r.Patch("/{id}", productHandler.PatchProduct())
 		})
 	})
 

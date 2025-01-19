@@ -13,6 +13,7 @@ type ProductsRepositoryInterface interface {
 	GetProductById(id int) (domain.Product, error)
 	CreateProduct(product domain.Product) (domain.Product, error)
 	UpdateProduct(id int, product domain.Product) (domain.Product, error)
+	PatchProduct(id int, product domain.Product) (domain.Product, error)
 }
 
 type productsRepository struct {
@@ -107,4 +108,42 @@ func (pr *productsRepository) UpdateProduct(id int, product domain.Product) (dom
 	pr.products[oldProduct] = product
 
 	return pr.products[oldProduct], nil
+}
+
+func (pr *productsRepository) PatchProduct(id int, product domain.Product) (domain.Product, error) {
+	var productIndex = -1
+	for index, prod := range pr.products {
+		if prod.CodeValue == product.CodeValue && id != prod.Id {
+			return domain.Product{}, fmt.Errorf("code value already exists")
+		}
+
+		if id == prod.Id {
+			productIndex = index
+		}
+	}
+
+	if productIndex == -1 {
+		return domain.Product{}, fmt.Errorf("product with id %d not found", id)
+	}
+
+	if product.Name != "" {
+		pr.products[productIndex].Name = product.Name
+	}
+	if product.Quantity > 0 {
+		pr.products[productIndex].Quantity = product.Quantity
+	}
+	if product.CodeValue != "" {
+		pr.products[productIndex].CodeValue = product.CodeValue
+	}
+	if product.IsPublished != pr.products[productIndex].IsPublished {
+		pr.products[productIndex].IsPublished = product.IsPublished
+	}
+	if product.Expiration != "" {
+		pr.products[productIndex].Expiration = product.Expiration
+	}
+	if product.Price > 0 {
+		pr.products[productIndex].Price = product.Price
+	}
+
+	return pr.products[productIndex], nil
 }

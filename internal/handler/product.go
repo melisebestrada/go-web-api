@@ -147,3 +147,35 @@ func (ph *ProductHandler) UpdateProduct() http.HandlerFunc {
 
 	}
 }
+
+func (ph *ProductHandler) PatchProduct() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		idProduct, err := strconv.Atoi(chi.URLParam(r, "id"))
+		if err != nil {
+			web.SendResponse(w, "Enter a valid id", nil, true, http.StatusBadRequest)
+			return
+		}
+
+		var reqBody domain.Product
+		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+			web.SendResponse(w, "Bad request", nil, true, http.StatusBadRequest)
+			return
+		}
+
+		if reqBody.Expiration != "" {
+			err := validations.ValidateDate(reqBody.Expiration)
+			if err != nil {
+				web.SendResponse(w, err.Error(), nil, true, http.StatusBadRequest)
+				return
+			}
+		}
+
+		updatedProduct, err := ph.service.PatchProduct(idProduct, reqBody)
+		if err != nil {
+			web.SendResponse(w, err.Error(), nil, true, http.StatusBadRequest)
+			return
+		}
+
+		web.SendResponse(w, "product updated", updatedProduct, false, http.StatusOK)
+	}
+}

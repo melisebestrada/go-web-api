@@ -13,6 +13,7 @@ type ProductServiceInterface interface {
 	SearchPriceGt(price float64) ([]domain.Product, error)
 	CreateProduct(product domain.Product) (domain.Product, error)
 	UpdateProduct(id int, product domain.Product) (domain.Product, error)
+	PatchProduct(id int, product domain.Product) (domain.Product, error)
 }
 
 type productService struct {
@@ -69,5 +70,10 @@ func (ps *productService) CreateProduct(product domain.Product) (domain.Product,
 
 func (ps *productService) UpdateProduct(id int, product domain.Product) (domain.Product, error) {
 	productUpdated, err := ps.repository.UpdateProduct(id, product)
+	return productUpdated, err
+}
+
+func (ps *productService) PatchProduct(id int, product domain.Product) (domain.Product, error) {
+	productUpdated, err := ps.repository.PatchProduct(id, product)
 	return productUpdated, err
 }
